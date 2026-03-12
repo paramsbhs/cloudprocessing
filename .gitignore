@@ -35,3 +35,8 @@ logs/
 
 # ── Docker volumes (if bind-mounted locally) ──────────────────────────────
 .docker/
+
+# ── Frontend ───────────────────────────────────────────────────────────────
+src/frontend/node_modules/
+src/frontend/dist/
+src/frontend/.vite/

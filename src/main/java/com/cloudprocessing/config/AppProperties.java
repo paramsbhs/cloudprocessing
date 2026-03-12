@@ -14,10 +14,12 @@ public class AppProperties {
     private final Jwt jwt = new Jwt();
     private final S3 s3 = new S3();
     private final Async async = new Async();
+    private final FileUpload file = new FileUpload();
 
     public Jwt getJwt() { return jwt; }
     public S3 getS3() { return s3; }
     public Async getAsync() { return async; }
+    public FileUpload getFile() { return file; }
 
     public static class Jwt {
         private String secret = "change-me-in-production-must-be-at-least-32-chars";
@@ -59,6 +61,26 @@ public class AppProperties {
 
         public int getPresignedUrlExpirationMinutes() { return presignedUrlExpirationMinutes; }
         public void setPresignedUrlExpirationMinutes(int mins) { this.presignedUrlExpirationMinutes = mins; }
+    }
+
+    public static class FileUpload {
+        private long maxSizeBytes = 104_857_600L; // 100 MB
+        private java.util.List<String> allowedContentTypes = java.util.List.of(
+            "application/pdf",
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "text/plain",
+            "application/zip",
+            "application/x-zip-compressed",
+            "application/gzip"
+        );
+
+        public long getMaxSizeBytes() { return maxSizeBytes; }
+        public void setMaxSizeBytes(long n) { this.maxSizeBytes = n; }
+
+        public java.util.List<String> getAllowedContentTypes() { return allowedContentTypes; }
+        public void setAllowedContentTypes(java.util.List<String> t) { this.allowedContentTypes = t; }
     }
 
     public static class Async {

@@ -27,8 +27,8 @@ public class FileController {
             @Valid @RequestBody CreateFileRequest request,
             @AuthenticationPrincipal User user) {
 
-        FileResponse response = fileService.createFile(user.getId(), request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok(fileService.createFile(user.getId(), request)));
     }
 
     /** List all files belonging to the authenticated user. */
@@ -48,12 +48,37 @@ public class FileController {
         return ResponseEntity.ok(ApiResponse.ok(fileService.getFile(fileId, user.getId())));
     }
 
-    /** Confirm that the client has finished uploading to S3. */
+    /**
+     * Confirm the client finished uploading to S3.
+     * Verifies the object actually exists in S3 before marking as UPLOADED.
+     */
     @PostMapping("/{fileId}/confirm-upload")
     public ResponseEntity<ApiResponse<FileResponse>> confirmUpload(
             @PathVariable UUID fileId,
             @AuthenticationPrincipal User user) {
 
         return ResponseEntity.ok(ApiResponse.ok(fileService.confirmUpload(fileId, user.getId())));
+    }
+
+    /**
+     * Get a presigned download URL.
+     * Points to the compressed output if available; otherwise the original file.
+     */
+    @GetMapping("/{fileId}/download")
+    public ResponseEntity<ApiResponse<DownloadResponse>> getDownloadUrl(
+            @PathVariable UUID fileId,
+            @AuthenticationPrincipal User user) {
+
+        return ResponseEntity.ok(ApiResponse.ok(fileService.getDownloadUrl(fileId, user.getId())));
+    }
+
+    /** Delete a file record and its S3 objects. */
+    @DeleteMapping("/{fileId}")
+    public ResponseEntity<Void> deleteFile(
+            @PathVariable UUID fileId,
+            @AuthenticationPrincipal User user) {
+
+        fileService.deleteFile(fileId, user.getId());
+        return ResponseEntity.noContent().build();
     }
 }
