@@ -1,0 +1,18 @@
+# Test profile — Testcontainers spins up a real Postgres container.
+# S3 beans are mocked via @MockBean in integration test classes.
+spring:
+  flyway:
+    enabled: true
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    com.cloudprocessing: DEBUG
+
+app:
+  jwt:
+    secret: test-secret-key-that-is-at-least-32-characters-long!!
+  s3:
+    endpoint: http://localhost:4566   # overridden by @MockBean in tests
+    bucket: test-bucket

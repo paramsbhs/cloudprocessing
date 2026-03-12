@@ -1,0 +1,12 @@
+-- V1: users
+-- Users are the only entity needed for auth; all other tables come in V2.
+
+CREATE TABLE users (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    email       VARCHAR(255) NOT NULL UNIQUE,
+    password    VARCHAR(255) NOT NULL,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users (email);

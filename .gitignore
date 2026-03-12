@@ -1,0 +1,37 @@
+# ── Maven ─────────────────────────────────────────────────────────────────
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# ── IDE ───────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+*.launch
+.vscode/
+*.code-workspace
+
+# ── Secrets / environment ─────────────────────────────────────────────────
+.env
+.env.local
+*.env
+application-local.yml
+application-secrets.yml
+
+# ── OS ────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ──────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── Docker volumes (if bind-mounted locally) ──────────────────────────────
+.docker/

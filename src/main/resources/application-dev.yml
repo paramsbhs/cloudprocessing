@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    com.cloudprocessing: DEBUG
+    org.springframework.security: DEBUG
+    org.flywaydb: DEBUG
+
+app:
+  s3:
+    endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}   # LocalStack
