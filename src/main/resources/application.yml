@@ -18,6 +18,7 @@ spring:
       idle-timeout: 300000
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate         # schema managed by Flyway; never let Hibernate mutate it
     show-sql: false

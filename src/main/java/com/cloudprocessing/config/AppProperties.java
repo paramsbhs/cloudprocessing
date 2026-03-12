@@ -33,7 +33,14 @@ public class AppProperties {
     public static class S3 {
         private String bucket = "cloud-processing-files";
         private String region = "us-east-1";
+        /** Internal S3/LocalStack endpoint used by S3Client (Docker service name). */
         private String endpoint = "";
+        /**
+         * Public-facing endpoint embedded in presigned URLs.
+         * Defaults to endpoint if not set. Override to localhost:4566 in local dev
+         * so clients outside Docker can reach LocalStack.
+         */
+        private String presignedEndpoint = "";
         private int presignedUrlExpirationMinutes = 15;
 
         public String getBucket() { return bucket; }
@@ -44,6 +51,11 @@ public class AppProperties {
 
         public String getEndpoint() { return endpoint; }
         public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
+
+        public String getPresignedEndpoint() {
+            return presignedEndpoint.isBlank() ? endpoint : presignedEndpoint;
+        }
+        public void setPresignedEndpoint(String e) { this.presignedEndpoint = e; }
 
         public int getPresignedUrlExpirationMinutes() { return presignedUrlExpirationMinutes; }
         public void setPresignedUrlExpirationMinutes(int mins) { this.presignedUrlExpirationMinutes = mins; }

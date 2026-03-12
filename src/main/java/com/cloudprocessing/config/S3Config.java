@@ -39,13 +39,20 @@ public class S3Config {
     }
 
     @Bean
-    public S3Presigner s3Presigner() {
+    public S3Presigner s3Presigner(AppProperties props) {
+        String presignedEndpoint = props.getS3().getPresignedEndpoint();
+
         var builder = S3Presigner.builder()
             .region(Region.of(region))
             .credentialsProvider(DefaultCredentialsProvider.create());
 
-        if (!endpoint.isBlank()) {
-            builder.endpointOverride(URI.create(endpoint));
+        if (!presignedEndpoint.isBlank()) {
+            // Path-style is required for LocalStack; real AWS ignores this setting.
+            builder.endpointOverride(URI.create(presignedEndpoint));
+            builder.serviceConfiguration(
+                software.amazon.awssdk.services.s3.S3Configuration.builder()
+                    .pathStyleAccessEnabled(true)
+                    .build());
         }
 
         return builder.build();

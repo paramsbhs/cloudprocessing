@@ -10,4 +10,5 @@ logging:
 
 app:
   s3:
-    endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}   # LocalStack
+    endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}          # LocalStack (internal)
+    presigned-endpoint: ${APP_S3_PRESIGNED-ENDPOINT:http://localhost:4566}  # public-facing
