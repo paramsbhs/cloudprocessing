@@ -108,7 +108,7 @@ public class FileService {
      * If compression is complete the URL points to the output file; otherwise the original.
      */
     @Transactional(readOnly = true)
-    public DownloadResponse getDownloadUrl(UUID fileId, UUID userId) {
+    public DownloadResponse getDownloadUrl(UUID fileId, UUID userId, boolean forceOriginal) {
         FileRecord file = fileRepository.findByIdAndUserId(fileId, userId)
             .orElseThrow(() -> AppException.notFound("File not found"));
 
@@ -116,7 +116,8 @@ public class FileService {
             throw AppException.badRequest("File has not been uploaded yet");
         }
 
-        boolean useOutput = file.getStatus() == FileStatus.COMPLETED
+        boolean useOutput = !forceOriginal
+            && file.getStatus() == FileStatus.COMPLETED
             && file.getOutputKey() != null;
 
         String key = useOutput ? file.getOutputKey() : file.getStorageKey();

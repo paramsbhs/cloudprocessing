@@ -3,8 +3,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
-import { Download, FileText, CheckCircle2, Clock, Loader2 } from "lucide-react";
-import { FileRecord, api } from "../api";
+import { Download, FileText, CheckCircle2, Clock, Loader2, Zap, XCircle } from "lucide-react";
+import { FileRecord, CompressionFormat, api } from "../api";
+
+function isImageType(contentType: string): boolean {
+  return contentType === "image/jpeg" || contentType === "image/png" || contentType === "image/webp" || contentType === "image/gif";
+}
+
+function isPdfType(contentType: string): boolean {
+  return contentType === "application/pdf";
+}
 
 type FrontendStatus = "pending" | "uploaded" | "processing" | "completed" | "failed";
 
@@ -43,10 +51,14 @@ interface JobDetailDrawerProps {
   file: FileRecord | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCompress?: (fileId: string, format: CompressionFormat) => Promise<void>;
 }
 
-export function JobDetailDrawer({ file, open, onOpenChange }: JobDetailDrawerProps) {
+export function JobDetailDrawer({ file, open, onOpenChange, onCompress }: JobDetailDrawerProps) {
   const [downloading, setDownloading] = useState(false);
+  const [downloadingOriginal, setDownloadingOriginal] = useState(false);
+  const [compressing, setCompressing] = useState(false);
+  const [compressError, setCompressError] = useState("");
 
   if (!file) return null;
 
@@ -57,15 +69,28 @@ export function JobDetailDrawer({ file, open, onOpenChange }: JobDetailDrawerPro
       ? Math.round(((file.sizeBytes - file.outputSizeBytes) / file.sizeBytes) * 100)
       : null;
 
-  const handleDownload = async () => {
-    setDownloading(true);
+  const handleDownload = async (original = false) => {
+    original ? setDownloadingOriginal(true) : setDownloading(true);
     try {
-      const { downloadUrl } = await api.files.getDownloadUrl(file.id);
+      const { downloadUrl } = await api.files.getDownloadUrl(file.id, original);
       window.open(downloadUrl, "_blank");
     } catch (err: any) {
       alert(err.message);
     } finally {
-      setDownloading(false);
+      original ? setDownloadingOriginal(false) : setDownloading(false);
+    }
+  };
+
+  const handleCompress = async (format: CompressionFormat) => {
+    if (!onCompress) return;
+    setCompressing(true);
+    setCompressError("");
+    try {
+      await onCompress(file.id, format);
+    } catch (err: any) {
+      setCompressError(err.message ?? "Failed to start compression");
+    } finally {
+      setCompressing(false);
     }
   };
 
@@ -73,6 +98,7 @@ export function JobDetailDrawer({ file, open, onOpenChange }: JobDetailDrawerPro
     switch (status) {
       case "completed":  return <CheckCircle2 className="w-5 h-5 text-green-400" />;
       case "processing": return <Loader2 className="w-5 h-5 text-yellow-400 animate-spin" />;
+      case "failed":     return <XCircle className="w-5 h-5 text-red-400" />;
       default:           return <Clock className="w-5 h-5 text-muted-foreground" />;
     }
   };
@@ -154,17 +180,68 @@ export function JobDetailDrawer({ file, open, onOpenChange }: JobDetailDrawerPro
             )}
           </div>
 
-          {/* Download */}
+          {/* Compress */}
+          {status === "uploaded" && onCompress && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5" />Choose compression format
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {isImageType(file.contentType) ? (
+                  <Button variant="outline" disabled={compressing}
+                    className="col-span-2" onClick={() => handleCompress('JPEG')}>
+                    {compressing ? <Loader2 className="w-4 h-4 animate-spin" /> : "JPEG (.jpg) — lossy"}
+                  </Button>
+                ) : isPdfType(file.contentType) ? (
+                  <Button variant="outline" disabled={compressing}
+                    className="col-span-2" onClick={() => handleCompress('GZIP')}>
+                    {compressing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Optimize PDF (.pdf)"}
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" disabled={compressing}
+                      onClick={() => handleCompress('GZIP')}>
+                      {compressing ? <Loader2 className="w-4 h-4 animate-spin" /> : "GZIP (.gz)"}
+                    </Button>
+                    <Button variant="outline" disabled={compressing}
+                      onClick={() => handleCompress('ZIP')}>
+                      ZIP (.zip)
+                    </Button>
+                  </>
+                )}
+              </div>
+              {compressError && (
+                <p className="text-xs text-red-400">{compressError}</p>
+              )}
+            </div>
+          )}
+
+          {/* Download compressed */}
           {status === "completed" && (
             <Button
               className="w-full bg-primary hover:bg-primary/90"
-              onClick={handleDownload}
+              onClick={() => handleDownload(false)}
               disabled={downloading}
             >
               {downloading
                 ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 : <Download className="w-4 h-4 mr-2" />}
               Download Compressed File
+            </Button>
+          )}
+
+          {/* Download original */}
+          {(status === "uploaded" || status === "completed" || status === "failed") && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleDownload(true)}
+              disabled={downloadingOriginal}
+            >
+              {downloadingOriginal
+                ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                : <Download className="w-4 h-4 mr-2" />}
+              Download Original
             </Button>
           )}
         </div>

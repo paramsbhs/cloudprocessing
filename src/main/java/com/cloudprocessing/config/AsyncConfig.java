@@ -3,6 +3,7 @@ package com.cloudprocessing.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
@@ -13,6 +14,7 @@ import java.util.concurrent.Executor;
  * leaving the default executor free for other async calls.
  */
 @Configuration
+@EnableScheduling
 public class AsyncConfig {
 
     @Value("${app.async.core-pool-size:4}")

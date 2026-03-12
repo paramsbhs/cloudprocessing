@@ -67,9 +67,11 @@ public class FileController {
     @GetMapping("/{fileId}/download")
     public ResponseEntity<ApiResponse<DownloadResponse>> getDownloadUrl(
             @PathVariable UUID fileId,
+            @RequestParam(defaultValue = "false") boolean original,
             @AuthenticationPrincipal User user) {
 
-        return ResponseEntity.ok(ApiResponse.ok(fileService.getDownloadUrl(fileId, user.getId())));
+        return ResponseEntity.ok(ApiResponse.ok(
+            fileService.getDownloadUrl(fileId, user.getId(), original)));
     }
 
     /** Delete a file record and its S3 objects. */

@@ -26,6 +26,39 @@ export interface FileRecord {
   updatedAt: string;
 }
 
+export type JobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export type CompressionFormat = 'GZIP' | 'ZIP' | 'JPEG';
+
+export interface JobRecord {
+  jobId: string;
+  fileId: string;
+  originalName: string;
+  status: JobStatus;
+  attemptCount: number;
+  maxAttempts: number;
+  errorMessage: string | null;
+  processingStartedAt: string | null;
+  processingCompletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  compressionFormat: CompressionFormat;
+  compressionRatio: number | null;
+  processingTimeMs: number | null;
+}
+
+export interface StatsRecord {
+  totalFiles: number;
+  totalJobs: number;
+  completedJobs: number;
+  failedJobs: number;
+  processingJobs: number;
+  queuedJobs: number;
+  avgCompressionPercent: number;
+  avgProcessingTimeMs: number;
+  totalBytesSaved: number;
+}
+
 export interface DownloadResponse {
   fileId: string;
   downloadUrl: string;
@@ -102,11 +135,27 @@ export const api = {
     confirmUpload: (id: string) =>
       request<FileRecord>(`/files/${id}/confirm-upload`, { method: 'POST' }),
 
-    getDownloadUrl: (id: string) =>
-      request<DownloadResponse>(`/files/${id}/download`),
+    getDownloadUrl: (id: string, original = false) =>
+      request<DownloadResponse>(`/files/${id}/download${original ? '?original=true' : ''}`),
 
     delete: (id: string) =>
       request<void>(`/files/${id}`, { method: 'DELETE' }),
+  },
+
+  jobs: {
+    create: (fileId: string, compressionFormat?: CompressionFormat) =>
+      request<JobRecord>('/jobs', {
+        method: 'POST',
+        body: JSON.stringify({ fileId, compressionFormat: compressionFormat ?? null }),
+      }),
+
+    list: () => request<JobRecord[]>('/jobs'),
+
+    get: (jobId: string) => request<JobRecord>(`/jobs/${jobId}`),
+  },
+
+  stats: {
+    get: () => request<StatsRecord>('/stats'),
   },
 };
 

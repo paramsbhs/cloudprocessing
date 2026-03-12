@@ -2,6 +2,7 @@ package com.cloudprocessing.storage;
 
 import com.cloudprocessing.config.AppProperties;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -89,6 +90,33 @@ public class StorageService {
         } catch (NoSuchKeyException e) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Downloads an object from S3 and returns its bytes.
+     * Used by compression workers to fetch the original file.
+     */
+    public byte[] downloadObject(String storageKey) {
+        return s3Client.getObjectAsBytes(GetObjectRequest.builder()
+            .bucket(appProperties.getS3().getBucket())
+            .key(storageKey)
+            .build()).asByteArray();
+    }
+
+    /**
+     * Uploads raw bytes to S3 and returns the number of bytes stored.
+     * Used by compression workers to persist the compressed output.
+     */
+    public long uploadObject(String storageKey, byte[] data, String contentType) {
+        s3Client.putObject(
+            PutObjectRequest.builder()
+                .bucket(appProperties.getS3().getBucket())
+                .key(storageKey)
+                .contentType(contentType)
+                .contentLength((long) data.length)
+                .build(),
+            RequestBody.fromBytes(data));
+        return data.length;
     }
 
     /**

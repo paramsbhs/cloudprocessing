@@ -15,6 +15,10 @@ WORKDIR /app
 
 # Non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Ghostscript for PDF compression
+RUN apk add --no-cache ghostscript
+
 USER appuser
 
 COPY --from=build /app/target/cloud-processing-*.jar app.jar

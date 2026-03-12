@@ -1,0 +1,38 @@
+# Build artifacts
+target/
+*.jar
+*.war
+
+# Frontend node_modules and build
+src/frontend/node_modules/
+src/frontend/dist/
+src/frontend/.vite/
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docs
+README.md
+*.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Env files (never bake secrets into image)
+.env
+.env.*
