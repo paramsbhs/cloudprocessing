@@ -2,7 +2,7 @@
 
 A cloud file compression service. Upload files, compress them asynchronously, download the result.
 
-![Dashboard](./Screenshot%202026-03-12%20at%202.20.55%20PM.png)
+![Dashboard](./dashboard.png)
 
 ---
 
